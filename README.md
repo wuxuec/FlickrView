@@ -6,3 +6,6 @@ The android project named FlickrView is a app of photo gallery from Flickr. It i
 
 v1.1
 It could include more page dynamically when you scroll down to the bottom. Besides, FlickrView dynamically adjust the number of columns when the screen sizes change.
+
+v1.2
+Adding a caching layer and Preloading images
