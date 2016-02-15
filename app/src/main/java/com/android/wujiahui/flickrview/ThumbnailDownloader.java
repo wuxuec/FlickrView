@@ -100,6 +100,11 @@ public class ThumbnailDownloader<T> extends HandlerThread {
     public void clearQueue() {
         mRequestHandler.removeMessages(MESSAGE_DOWNLOAD);
         mRequestHandler.removeMessages(MESSAGE_PRELOAD);
+//        mLruCache.evictAll();
+    }
+
+    public void clearCache() {
+        mLruCache.evictAll();
     }
 
     @Override
@@ -135,10 +140,10 @@ public class ThumbnailDownloader<T> extends HandlerThread {
         }
 
         if (getBitmapFromLruCache(url) == null) {
-            Log.i(TAG, "it's download now");
+//            Log.i(TAG, "it's download now");
             downloadBitmapIntoCache(url);
         } else {
-            Log.i(TAG, "it's preloaded");
+//            Log.i(TAG, "it's preloaded");
         }
 
         final Bitmap bitmap = getBitmapFromLruCache(url);
@@ -156,7 +161,7 @@ public class ThumbnailDownloader<T> extends HandlerThread {
                 //Log.i(TAG, "Bitmap start to pass");
                 mRequestMap.remove(target);
                 mThumbnailDownloadListener.onThumbnailDownloaded(target, bitmap);
-                Log.i(TAG, "Bitmap passed to the main thread");
+//                Log.i(TAG, "Bitmap passed to the main thread");
             }
         });
 

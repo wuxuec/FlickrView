@@ -113,10 +113,10 @@ public class FlickrViewFragment extends VisiableFragment {
                         updateItems(lastPage++);
                     }
 
-//                    int firstVisiableItem = gridLayoutManager.findFirstVisibleItemPosition();
-//                    int lastVisiableItem = gridLayoutManager.findLastVisibleItemPosition();
-//
-//                    preloadAdjacentImages(firstVisiableItem, lastVisiableItem);
+                    int firstVisiableItem = gridLayoutManager.findFirstVisibleItemPosition();
+                    int lastVisiableItem = gridLayoutManager.findLastVisibleItemPosition();
+
+                    preloadAdjacentImages(firstVisiableItem, lastVisiableItem);
 
                 }
 
@@ -182,7 +182,11 @@ public class FlickrViewFragment extends VisiableFragment {
                 Log.d(TAG, "QueryTextSubmit: " + query);
                 QueryPreferences.setStoredQuery(getActivity(), query);
                 searchItem.collapseActionView();
-                updateItems(0);
+//                updateItems(0);
+
+                recoverPage();
+
+                updateItems(lastPage++);
                 return true;
             }
 
@@ -214,7 +218,8 @@ public class FlickrViewFragment extends VisiableFragment {
         switch (item.getItemId()) {
             case R.id.menu_item_clear:
                 QueryPreferences.setStoredQuery(getActivity(), null);
-                updateItems(0);
+                recoverPage();
+                updateItems(lastPage++);
                 return true;
 
             case R.id.menu_item_toggle_polling:
@@ -309,7 +314,7 @@ public class FlickrViewFragment extends VisiableFragment {
         for (int i = startPostion; i <= endPosition; i++) {
             mThumbnailDownloader
                     .preloadBitmapIntoCache(mItems.get(i).getUrl());
-            //Log.i(TAG, "The preload url is :  " + mItems.get(i).getUrl());
+//            Log.i(TAG, "The preload url is :  " + mItems.get(i).getUrl());
 
         }
     }
@@ -364,5 +369,13 @@ public class FlickrViewFragment extends VisiableFragment {
 
 
         }
+    }
+
+    private void recoverPage() {
+        mThumbnailDownloader.clearQueue();
+        mThumbnailDownloader.clearCache();
+        lastPage = 0;
+        mItems.clear();
+
     }
 }
