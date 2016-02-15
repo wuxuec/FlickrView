@@ -38,7 +38,7 @@ public class FlickrViewFragment extends VisiableFragment {
 
     private RecyclerView mPhotoRecyclerView;
     private List<FlickrItem> mItems = new ArrayList<>();
-    private int lastPage = 0;
+    public static int lastPage = 0;
     private FlickrFetchr mFlickrFetchr;
     private boolean backgroundIsLoading = false;
     private ThumbnailDownloader<PhotoHolder> mThumbnailDownloader;
@@ -54,10 +54,13 @@ public class FlickrViewFragment extends VisiableFragment {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
         setHasOptionsMenu(true);
+
+//        setupAdapter();
+
         mFlickrFetchr = new FlickrFetchr();
-        lastPage++;
+
 //        new FetchItemTask().execute(lastPage);
-        updateItems();
+        updateItems(lastPage++);
 
 //        Intent i = PollService.newIntent(getActivity());
 //        getActivity().startService(i);
@@ -107,14 +110,13 @@ public class FlickrViewFragment extends VisiableFragment {
                         Log.i(TAG, "it's loading a new page, the total items is "
                                 + String.valueOf(totalItemsNumber));
                         Toast.makeText(getActivity(), "正在加载新一页", Toast.LENGTH_SHORT).show();
-                        lastPage++;
-//                        new FetchItemTask().execute(lastPage);
+                        updateItems(lastPage++);
                     }
 
-                    int firstVisiableItem = gridLayoutManager.findFirstVisibleItemPosition();
-                    int lastVisiableItem = gridLayoutManager.findLastVisibleItemPosition();
-
-                    preloadAdjacentImages(firstVisiableItem, lastVisiableItem);
+//                    int firstVisiableItem = gridLayoutManager.findFirstVisibleItemPosition();
+//                    int lastVisiableItem = gridLayoutManager.findLastVisibleItemPosition();
+//
+//                    preloadAdjacentImages(firstVisiableItem, lastVisiableItem);
 
                 }
 
@@ -180,7 +182,7 @@ public class FlickrViewFragment extends VisiableFragment {
                 Log.d(TAG, "QueryTextSubmit: " + query);
                 QueryPreferences.setStoredQuery(getActivity(), query);
                 searchItem.collapseActionView();
-                updateItems();
+                updateItems(0);
                 return true;
             }
 
@@ -212,7 +214,7 @@ public class FlickrViewFragment extends VisiableFragment {
         switch (item.getItemId()) {
             case R.id.menu_item_clear:
                 QueryPreferences.setStoredQuery(getActivity(), null);
-                updateItems();
+                updateItems(0);
                 return true;
 
             case R.id.menu_item_toggle_polling:
@@ -226,9 +228,9 @@ public class FlickrViewFragment extends VisiableFragment {
         }
     }
 
-    private void updateItems() {
+    private void updateItems(int pageNumber) {
         String query = QueryPreferences.getStoredQuery(getActivity());
-        new FetchItemTask(query).execute();
+        new FetchItemTask(query).execute(pageNumber);
     }
 
     private void setupAdapter() {
@@ -322,12 +324,12 @@ public class FlickrViewFragment extends VisiableFragment {
 
         @Override
         protected void onPreExecute() {
-            mProgressDialog = new ProgressDialog(getActivity());
-            mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            mProgressDialog.setIndeterminate(true);
-            mProgressDialog.setTitle("FlickrView");
-            mProgressDialog.setMessage("It's loading....");
-            mProgressDialog.show();
+//            mProgressDialog = new ProgressDialog(getActivity());
+//            mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+//            mProgressDialog.setIndeterminate(true);
+//            mProgressDialog.setTitle("FlickrView");
+//            mProgressDialog.setMessage("It's loading....");
+//            mProgressDialog.show();
         }
 
         @Override
@@ -338,9 +340,9 @@ public class FlickrViewFragment extends VisiableFragment {
 //            String query = "robot"; //just for testing
 
             if (mQuery == null) {
-                return new FlickrFetchr().fetchRecentPhotos();
+                return new FlickrFetchr().fetchRecentPhotos(voids[0]);
             } else {
-                return new FlickrFetchr().searchPhotos(mQuery);
+                return new FlickrFetchr().searchPhotos(mQuery, voids[0]);
             }
 
         }
@@ -348,15 +350,19 @@ public class FlickrViewFragment extends VisiableFragment {
         @Override
         protected void onPostExecute(List<FlickrItem> flickrItems) {
             backgroundIsLoading = false;
-//            mItems.addAll(flickrItems);
-            mItems = flickrItems;
-            if (mProgressDialog != null) {
-                mProgressDialog.dismiss();
+
+            if (mItems == null) {
+                mItems = flickrItems;
+                setupAdapter();
+            } else {
+                mItems.addAll(flickrItems);
+                mPhotoRecyclerView.getAdapter().notifyDataSetChanged();
             }
+//            if (mProgressDialog != null) {
+//                mProgressDialog.dismiss();
+//            }
 
-            setupAdapter();
 
-            mPhotoRecyclerView.getAdapter().notifyDataSetChanged();
         }
     }
 }
