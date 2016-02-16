@@ -25,6 +25,8 @@ import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Picasso;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -264,6 +266,11 @@ public class FlickrViewFragment extends VisiableFragment {
 
         public void bindFlickrItem(FlickrItem flickrItem) {
             mFlickrItem = flickrItem;
+
+            Picasso.with(getActivity())
+                    .load(flickrItem.getUrl())
+                    .placeholder(R.drawable.bill_up_close)
+                    .into(mItemImageView);
         }
 
         @Override
@@ -293,9 +300,9 @@ public class FlickrViewFragment extends VisiableFragment {
         public void onBindViewHolder(PhotoHolder holder, int position) {
             FlickrItem flickrItem = mFlickrItems.get(position);
             holder.bindFlickrItem(flickrItem);
-            Drawable placeHolder = getResources().getDrawable(R.drawable.bill_up_close);
-            holder.bindDrawable(placeHolder);
-            mThumbnailDownloader.queueThumnail(holder, flickrItem.getUrl());
+//            Drawable placeHolder = getResources().getDrawable(R.drawable.bill_up_close);
+//            holder.bindDrawable(placeHolder);
+//            mThumbnailDownloader.queueThumnail(holder, flickrItem.getUrl());
 
         }
 

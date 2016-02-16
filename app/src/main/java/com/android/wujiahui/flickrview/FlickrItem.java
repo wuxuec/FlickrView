@@ -2,6 +2,8 @@ package com.android.wujiahui.flickrview;
 
 import android.net.Uri;
 
+import com.squareup.picasso.Picasso;
+
 /**
  * Created by 武家辉 on 2015/12/15.
  */
