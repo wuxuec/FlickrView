@@ -10,10 +10,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,6 +25,8 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -82,6 +85,8 @@ public class FlickrViewFragment extends VisiableFragment {
         mThumbnailDownloader.start();
         mThumbnailDownloader.getLooper();
         Log.i(TAG, "Backgroud thread started");
+
+//        android.app.ActionBar actionBar = getActivity().getActionBar();
     }
 
     @Nullable
@@ -91,7 +96,7 @@ public class FlickrViewFragment extends VisiableFragment {
 
         mPhotoRecyclerView = (RecyclerView) v
                 .findViewById(R.id.fragment_flickr_view_recycler_view);
-        mPhotoRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
+        mPhotoRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 2));
         mPhotoRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
 
             boolean isScrollToButtom = false;
@@ -139,8 +144,8 @@ public class FlickrViewFragment extends VisiableFragment {
                     public void onGlobalLayout() {
                         Point size = new Point();
                         getActivity().getWindowManager().getDefaultDisplay().getSize(size);
-                        int newColumns = (int) ((size.x * 3) / 1440);
-                        if (newColumns != 3) {
+                        int newColumns = (int) ((size.x * 2) / 1440);
+                        if (newColumns != 2) {
                             GridLayoutManager gridLayoutManager = (GridLayoutManager)
                                     mPhotoRecyclerView.getLayoutManager();
                             gridLayoutManager.setSpanCount(newColumns);
@@ -208,9 +213,16 @@ public class FlickrViewFragment extends VisiableFragment {
         MenuItem toggleItem = menu.findItem(R.id.menu_item_toggle_polling);
         if (PollService.isServiceAlarmOn(getActivity())) {
             toggleItem.setTitle(R.string.stop_polling);
+            toggleItem.setIcon(R.drawable.ic_alarm_on_white_24dp);
+            Toast.makeText(getActivity(),"Notification is on!", Toast.LENGTH_SHORT).show();
         } else {
             toggleItem.setTitle(R.string.start_polling);
+            toggleItem.setIcon(R.drawable.ic_alarm_off_white_24dp);
+            Toast.makeText(getActivity(),"Notification is off!!", Toast.LENGTH_SHORT).show();
         }
+
+        MenuItem refreshItem = menu.findItem(R.id.menu_item_refresh);
+        refreshItem.setIcon(R.drawable.ic_autorenew_white_24dp);
     }
 
     @Override
@@ -226,6 +238,11 @@ public class FlickrViewFragment extends VisiableFragment {
                 boolean shouldStartAlarm = !PollService.isServiceAlarmOn(getActivity());
                 PollService.setServiceAlarm(getActivity(), shouldStartAlarm);
                 getActivity().invalidateOptionsMenu();//update menu;
+                return true;
+
+            case R.id.menu_item_refresh:
+                recoverPage();
+                updateItems(lastPage++);
                 return true;
 
             default:
@@ -255,6 +272,7 @@ public class FlickrViewFragment extends VisiableFragment {
 
             mItemImageView = (ImageView) itemView
             .findViewById(R.id.fragment_flickr_view_image_view);
+            itemView.setBackgroundColor(android.graphics.Color.parseColor("#424242"));
             itemView.setOnClickListener(this);
         }
 
@@ -264,6 +282,11 @@ public class FlickrViewFragment extends VisiableFragment {
 
         public void bindFlickrItem(FlickrItem flickrItem) {
             mFlickrItem = flickrItem;
+
+//            Picasso.with(getActivity())
+//                    .load(flickrItem.getUrl())
+//                    .placeholder(R.drawable.bill_up_close)
+//                    .into(mItemImageView);
         }
 
         @Override
@@ -293,7 +316,7 @@ public class FlickrViewFragment extends VisiableFragment {
         public void onBindViewHolder(PhotoHolder holder, int position) {
             FlickrItem flickrItem = mFlickrItems.get(position);
             holder.bindFlickrItem(flickrItem);
-            Drawable placeHolder = getResources().getDrawable(R.drawable.bill_up_close);
+            Drawable placeHolder = getResources().getDrawable(R.drawable.loading);
             holder.bindDrawable(placeHolder);
             mThumbnailDownloader.queueThumnail(holder, flickrItem.getUrl());
 
@@ -306,8 +329,8 @@ public class FlickrViewFragment extends VisiableFragment {
     }
 
     private void preloadAdjacentImages(int firstPosition, int lastPosition) {
-        int startPostion = Math.max(firstPosition - 10, 0);
-        int endPosition = Math.min(lastPosition+10, mPhotoRecyclerView.getAdapter().getItemCount()-1);
+        int startPostion = Math.max(firstPosition - 5, 0);
+        int endPosition = Math.min(lastPosition+5, mPhotoRecyclerView.getAdapter().getItemCount()-1);
 
         Log.i(TAG, "The last position is "+String.valueOf(endPosition));
 

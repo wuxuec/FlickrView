@@ -77,6 +77,8 @@ public class ThumbnailDownloader<T> extends HandlerThread {
             addBitmapToLruCache(key, bitmapLoaded);
         } catch (IOException ioe) {
             Log.e(TAG, "Error downloading image", ioe);
+        } catch (OutOfMemoryError outOfMemoryError) {
+            Log.e(TAG, "OutOfMemoryError: ", outOfMemoryError);
         }
 
     }

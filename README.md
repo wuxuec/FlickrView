@@ -9,3 +9,6 @@ It could include more page dynamically when you scroll down to the bottom. Besid
 
 v1.2
 Adding a caching layer and Preloading images
+
+v1.3
+Update some UI layout and photos, buttons.
