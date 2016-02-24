@@ -15,12 +15,13 @@ tools:context="com.wujiahui.android.testfloatbutton.MainActivity">
             android:scrollbars="vertical"
             android:layout_height="match_parent"/>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity = "center"
+            style="@android:style/Widget.ProgressBar.Large.Inverse"/>
 
-        android:src="@android:drawable/ic_dialog_email"/>
+
 
 </android.support.design.widget.CoordinatorLayout>

@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
@@ -45,7 +46,7 @@ public class FlickrViewFragment extends VisiableFragment {
     private FlickrFetchr mFlickrFetchr;
     private boolean backgroundIsLoading = false;
     private ThumbnailDownloader<PhotoHolder> mThumbnailDownloader;
-    private ProgressDialog mProgressDialog;
+    private ProgressBar mProgressBar;
 
     public static FlickrViewFragment newInstance() {
         return new FlickrViewFragment();
@@ -94,6 +95,8 @@ public class FlickrViewFragment extends VisiableFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_flickr_view, container, false);
 
+        mProgressBar = (ProgressBar) v.findViewById(R.id.progressBar);
+
         mPhotoRecyclerView = (RecyclerView) v
                 .findViewById(R.id.fragment_flickr_view_recycler_view);
         mPhotoRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 2));
@@ -120,6 +123,8 @@ public class FlickrViewFragment extends VisiableFragment {
 
                     int firstVisiableItem = gridLayoutManager.findFirstVisibleItemPosition();
                     int lastVisiableItem = gridLayoutManager.findLastVisibleItemPosition();
+
+                    mThumbnailDownloader.clearPreloadQueue();
 
                     preloadAdjacentImages(firstVisiableItem, lastVisiableItem);
 
@@ -191,6 +196,8 @@ public class FlickrViewFragment extends VisiableFragment {
 
                 recoverPage();
 
+                mProgressBar.setVisibility(ProgressBar.VISIBLE);
+
                 updateItems(lastPage++);
                 return true;
             }
@@ -213,11 +220,11 @@ public class FlickrViewFragment extends VisiableFragment {
         MenuItem toggleItem = menu.findItem(R.id.menu_item_toggle_polling);
         if (PollService.isServiceAlarmOn(getActivity())) {
             toggleItem.setTitle(R.string.stop_polling);
-            toggleItem.setIcon(R.drawable.ic_alarm_on_white_24dp);
+            toggleItem.setIcon(R.drawable.ic_notifications_none_white_24dp);
             Toast.makeText(getActivity(),"Notification is on!", Toast.LENGTH_SHORT).show();
         } else {
             toggleItem.setTitle(R.string.start_polling);
-            toggleItem.setIcon(R.drawable.ic_alarm_off_white_24dp);
+            toggleItem.setIcon(R.drawable.ic_notifications_off_white_24dp);
             Toast.makeText(getActivity(),"Notification is off!!", Toast.LENGTH_SHORT).show();
         }
 
@@ -272,7 +279,7 @@ public class FlickrViewFragment extends VisiableFragment {
 
             mItemImageView = (ImageView) itemView
             .findViewById(R.id.fragment_flickr_view_image_view);
-            itemView.setBackgroundColor(android.graphics.Color.parseColor("#424242"));
+//            itemView.setBackgroundColor(android.graphics.Color.parseColor("#424242"));
             itemView.setOnClickListener(this);
         }
 
@@ -329,10 +336,10 @@ public class FlickrViewFragment extends VisiableFragment {
     }
 
     private void preloadAdjacentImages(int firstPosition, int lastPosition) {
-        int startPostion = Math.max(firstPosition - 5, 0);
-        int endPosition = Math.min(lastPosition+5, mPhotoRecyclerView.getAdapter().getItemCount()-1);
+        int startPostion = Math.max(firstPosition - 10, 0);
+        int endPosition = Math.min(lastPosition + 10, mPhotoRecyclerView.getAdapter().getItemCount()-1);
 
-        Log.i(TAG, "The last position is "+String.valueOf(endPosition));
+        Log.i(TAG, "The first position is "+String.valueOf(firstPosition));
 
         for (int i = startPostion; i <= endPosition; i++) {
             mThumbnailDownloader
@@ -352,6 +359,9 @@ public class FlickrViewFragment extends VisiableFragment {
 
         @Override
         protected void onPreExecute() {
+
+//            mProgressBar.setVisibility(ProgressBar.VISIBLE);
+
 //            mProgressDialog = new ProgressDialog(getActivity());
 //            mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 //            mProgressDialog.setIndeterminate(true);
@@ -379,6 +389,9 @@ public class FlickrViewFragment extends VisiableFragment {
         protected void onPostExecute(List<FlickrItem> flickrItems) {
             backgroundIsLoading = false;
 
+
+            mProgressBar.setVisibility(ProgressBar.GONE);
+
             if (mItems == null) {
                 mItems = flickrItems;
                 setupAdapter();
@@ -389,6 +402,7 @@ public class FlickrViewFragment extends VisiableFragment {
 //            if (mProgressDialog != null) {
 //                mProgressDialog.dismiss();
 //            }
+//
 
 
         }

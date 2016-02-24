@@ -10,7 +10,7 @@
 
     <item android:id="@+id/menu_item_toggle_polling"
           android:title="@string/start_polling"
-          android:icon="@drawable/ic_alarm_on_white_24dp"
+          android:icon="@drawable/ic_notifications_none_white_24dp"
           app:showAsAction = "ifRoom"/>
 
     <item android:id="@+id/menu_item_refresh"

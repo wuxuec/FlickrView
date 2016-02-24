@@ -71,6 +71,9 @@ public class ThumbnailDownloader<T> extends HandlerThread {
 
     private  void downloadBitmapIntoCache(String key) {
         try {
+
+//            Log.i(TAG, "Loading the url: "+key);
+
             byte[] bitmapBytes = new FlickrFetchr().getUrlBytes(key);
             final Bitmap bitmapLoaded = BitmapFactory
                     .decodeByteArray(bitmapBytes, 0, bitmapBytes.length);
@@ -105,6 +108,10 @@ public class ThumbnailDownloader<T> extends HandlerThread {
 //        mLruCache.evictAll();
     }
 
+    public void clearPreloadQueue() {
+        mRequestHandler.removeMessages(MESSAGE_PRELOAD);
+    }
+
     public void clearCache() {
         mLruCache.evictAll();
     }
@@ -116,10 +123,11 @@ public class ThumbnailDownloader<T> extends HandlerThread {
             public void handleMessage(Message msg) {
                 if (msg.what == MESSAGE_DOWNLOAD) {
                     T target = (T) msg.obj;
-                    //Log.i(TAG, "Got a request for URL: " + mRequestMap.get(target));
+                    Log.i(TAG, "22222222Download url: " + mRequestMap.get(target));
                     handleRequest(target);
                 } else if (msg.what == MESSAGE_PRELOAD) {
                     String url = (String)msg.obj;
+                    Log.i(TAG, "3333333Preload url"+url);
                     handlePreload(url);
                 }
             }
@@ -160,7 +168,7 @@ public class ThumbnailDownloader<T> extends HandlerThread {
                 if (mRequestMap.get(target) != url) {
                     return;
                 }
-                //Log.i(TAG, "Bitmap start to pass");
+                Log.i(TAG, "1111111url loaded: "+url);
                 mRequestMap.remove(target);
                 mThumbnailDownloadListener.onThumbnailDownloaded(target, bitmap);
 //                Log.i(TAG, "Bitmap passed to the main thread");
