@@ -12,3 +12,6 @@ Adding a caching layer and Preloading images
 
 v1.3
 Update some UI layout and photos, buttons.
+
+v1.4
+Optimizing the speed by using okHttp and compressing the photo before it go into the memory cache and changing the time the the download task should happen. Besides, fix some bugs and optimize the progressbar

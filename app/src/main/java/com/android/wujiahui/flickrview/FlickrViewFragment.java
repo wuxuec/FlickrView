@@ -47,6 +47,8 @@ public class FlickrViewFragment extends VisiableFragment {
     private boolean backgroundIsLoading = false;
     private ThumbnailDownloader<PhotoHolder> mThumbnailDownloader;
     private ProgressBar mProgressBar;
+    private ProgressDialog mProgressDialog;
+//    private boolean mIsRecyclerViewIdle = true;
 
     public static FlickrViewFragment newInstance() {
         return new FlickrViewFragment();
@@ -85,6 +87,7 @@ public class FlickrViewFragment extends VisiableFragment {
         );
         mThumbnailDownloader.start();
         mThumbnailDownloader.getLooper();
+
         Log.i(TAG, "Backgroud thread started");
 
 //        android.app.ActionBar actionBar = getActivity().getActionBar();
@@ -96,6 +99,12 @@ public class FlickrViewFragment extends VisiableFragment {
         View v = inflater.inflate(R.layout.fragment_flickr_view, container, false);
 
         mProgressBar = (ProgressBar) v.findViewById(R.id.progressBar);
+
+        if (mItems == null) {
+            mProgressBar.setVisibility(ProgressBar.VISIBLE);
+        } else {
+            mProgressBar.setVisibility(ProgressBar.GONE);
+        }
 
         mPhotoRecyclerView = (RecyclerView) v
                 .findViewById(R.id.fragment_flickr_view_recycler_view);
@@ -109,6 +118,9 @@ public class FlickrViewFragment extends VisiableFragment {
                 GridLayoutManager gridLayoutManager = (GridLayoutManager) recyclerView.getLayoutManager();
 
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+
+//                    mIsRecyclerViewIdle = true;
+
                     int lastItemPosition = gridLayoutManager.findLastCompletelyVisibleItemPosition();
 
                     int totalItemsNumber = gridLayoutManager.getItemCount();
@@ -127,6 +139,8 @@ public class FlickrViewFragment extends VisiableFragment {
                     mThumbnailDownloader.clearPreloadQueue();
 
                     preloadAdjacentImages(firstVisiableItem, lastVisiableItem);
+
+
 
                 }
 
@@ -155,6 +169,9 @@ public class FlickrViewFragment extends VisiableFragment {
                                     mPhotoRecyclerView.getLayoutManager();
                             gridLayoutManager.setSpanCount(newColumns);
                         }
+
+                        mThumbnailDownloader.setSampleSize(size.x / newColumns, size.y/newColumns);
+//                        Log.i(TAG, "Set the request photo size");
 
                     }
                 });
@@ -362,12 +379,12 @@ public class FlickrViewFragment extends VisiableFragment {
 
 //            mProgressBar.setVisibility(ProgressBar.VISIBLE);
 
-//            mProgressDialog = new ProgressDialog(getActivity());
-//            mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-//            mProgressDialog.setIndeterminate(true);
-//            mProgressDialog.setTitle("FlickrView");
-//            mProgressDialog.setMessage("It's loading....");
-//            mProgressDialog.show();
+            mProgressDialog = new ProgressDialog(getActivity());
+            mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            mProgressDialog.setIndeterminate(true);
+            mProgressDialog.setTitle("FlickrView");
+            mProgressDialog.setMessage("It's loading....");
+            mProgressDialog.show();
         }
 
         @Override
@@ -390,8 +407,6 @@ public class FlickrViewFragment extends VisiableFragment {
             backgroundIsLoading = false;
 
 
-            mProgressBar.setVisibility(ProgressBar.GONE);
-
             if (mItems == null) {
                 mItems = flickrItems;
                 setupAdapter();
@@ -399,9 +414,15 @@ public class FlickrViewFragment extends VisiableFragment {
                 mItems.addAll(flickrItems);
                 mPhotoRecyclerView.getAdapter().notifyDataSetChanged();
             }
-//            if (mProgressDialog != null) {
-//                mProgressDialog.dismiss();
-//            }
+            if (mProgressDialog != null) {
+                mProgressDialog.dismiss();
+            }
+
+            if (mItems == null) {
+                mProgressBar.setVisibility(ProgressBar.VISIBLE);
+            } else {
+                mProgressBar.setVisibility(ProgressBar.GONE);
+            }
 //
 
 
@@ -413,6 +434,7 @@ public class FlickrViewFragment extends VisiableFragment {
         mThumbnailDownloader.clearCache();
         lastPage = 0;
         mItems.clear();
+        mPhotoRecyclerView.getAdapter().notifyDataSetChanged();
 
     }
 }

@@ -15,6 +15,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 /**
  * Created by 武家辉 on 2015/12/15.
  */
@@ -25,6 +29,7 @@ public class FlickrFetchr {
     private static final String API_KEY = "7ac1b92e29caaabe0842c59ab3bdc904";
     private static final String FETCH_RECENTS_METHOD = "flickr.photos.getRecent";
     private static final String SEARCH_METHOD = "flickr.photos.search";
+
 
     private static int pageNumber = 0;
 
@@ -42,28 +47,40 @@ public class FlickrFetchr {
 
     public byte[] getUrlBytes(String urlSpec) throws IOException{
         URL url = new URL(urlSpec);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+//        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+        OkHttpClient client = new OkHttpClient();
 
         try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            InputStream in = connection.getInputStream();
+//            ByteArrayOutputStream out = new ByteArrayOutputStream();
+//            InputStream in = connection.getInputStream();
+//
+//            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+//                throw new IOException(connection.getResponseMessage() +
+//                ": with " +
+//                urlSpec);
+//            }
+//
+//            int bytesRead = 0;
+//            byte[] buffer = new byte[1024];
+//            while ((bytesRead = in.read(buffer)) > 0) {
+//                out.write(buffer, 0, bytesRead);
+//            }
+//
+//            out.close();
+//            return out.toByteArray();
 
-            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                throw new IOException(connection.getResponseMessage() +
-                ": with " +
-                urlSpec);
-            }
+            Request request = new Request.Builder()
+                    .url(url)
+                    .build();
 
-            int bytesRead = 0;
-            byte[] buffer = new byte[1024];
-            while ((bytesRead = in.read(buffer)) > 0) {
-                out.write(buffer, 0, bytesRead);
-            }
+            Response response = client.newCall(request).execute();
 
-            out.close();
-            return out.toByteArray();
+            return response.body().bytes();
+
         } finally {
-            connection.disconnect();
+//            connection.disconnect();
+            Log.i(TAG, "OkHttpClient works!");
         }
 
 

@@ -25,8 +25,15 @@ public class ThumbnailDownloader<T> extends HandlerThread {
     private ConcurrentMap<T,String> mRequestMap = new ConcurrentHashMap<>();
     private Handler mResponseHandler;
     private ThumbnailDownloadListener<T> mThumbnailDownloadListener;
+    private int reqWidth;
+    private int reqHeight;
 
     private LruCache<String, Bitmap> mLruCache;
+
+    public void setSampleSize(int width, int height) {
+        reqWidth = width;
+        reqHeight = height;
+    }
 
     public interface ThumbnailDownloadListener<T> {
         void onThumbnailDownloaded(T target, Bitmap thumbnail);
@@ -75,8 +82,7 @@ public class ThumbnailDownloader<T> extends HandlerThread {
 //            Log.i(TAG, "Loading the url: "+key);
 
             byte[] bitmapBytes = new FlickrFetchr().getUrlBytes(key);
-            final Bitmap bitmapLoaded = BitmapFactory
-                    .decodeByteArray(bitmapBytes, 0, bitmapBytes.length);
+            final Bitmap bitmapLoaded = decodeSampledBitmapFromBytes(bitmapBytes);
             addBitmapToLruCache(key, bitmapLoaded);
         } catch (IOException ioe) {
             Log.e(TAG, "Error downloading image", ioe);
@@ -177,5 +183,43 @@ public class ThumbnailDownloader<T> extends HandlerThread {
 
 
 
+    }
+
+
+    private Bitmap decodeSampledBitmapFromBytes(byte[] res) {
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeByteArray(res, 0, res.length, options);
+
+        options.inSampleSize = calculateInSampleSize(options);
+
+        options.inJustDecodeBounds = false;
+
+        return BitmapFactory.decodeByteArray(res, 0, res.length, options);
+
+    }
+
+    private int calculateInSampleSize(BitmapFactory.Options options) {
+        int inSampleSize = 1;
+
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+
+        Log.i(TAG, "req: "+reqWidth+" "+reqHeight+" now: "+width+ " "+height);
+
+        if (height > reqHeight || width > reqWidth) {
+
+
+            final int halfHeight = height/2;
+            final int halfWidth = width/2;
+            while ((halfHeight/inSampleSize) >= reqHeight
+                && (halfWidth/inSampleSize) >= reqWidth) {
+                inSampleSize *= 2;
+            }
+
+            Log.i(TAG, "It becomes samller!");
+        }
+
+        return inSampleSize;
     }
 }
