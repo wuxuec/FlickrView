@@ -64,7 +64,7 @@ public class FlickrPageFragment extends VisiableFragment {
 
             public void onReceivedTitle(WebView webView, String title) {
                 AppCompatActivity activity  = (AppCompatActivity) getActivity();
-                activity.getSupportActionBar().setSubtitle(title);
+//                activity.getSupportActionBar().setSubtitle(title);
             }
         });
         mWebView.setWebViewClient(new WebViewClient() {
@@ -76,5 +76,11 @@ public class FlickrPageFragment extends VisiableFragment {
         mWebView.loadUrl(mUri.toString());
 
         return v;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
     }
 }
